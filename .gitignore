@@ -37,7 +37,6 @@ ENV/
 # Database
 *.sqlite3
 *.db
-gutendex.dump
 
 # Logs
 *.log
