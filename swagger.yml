@@ -1,0 +1,142 @@
+openapi: 3.0.0
+info:
+  title: Project Gutenberg API
+  description: |
+    API for querying and accessing books from Project Gutenberg.
+    Books are returned in decreasing order of popularity (download count).
+    Results are paginated with 25 books per page.
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+
+paths:
+  /books:
+    get:
+      summary: Get books based on filter criteria
+      description: |
+        Retrieve books meeting zero or more filter criteria.
+        Multiple filter values can be specified using comma separation.
+        Results are ordered by download count in descending order.
+      parameters:
+        - name: book_ids
+          in: query
+          description: Comma-separated list of Project Gutenberg book IDs
+          schema:
+            type: string
+            example: "11,12,13"
+        - name: language
+          in: query
+          description: Comma-separated list of language codes (e.g., en,fr)
+          schema:
+            type: string
+            example: "en,fr"
+        - name: mime_type
+          in: query
+          description: Comma-separated list of mime types (e.g., text/plain,text/html)
+          schema:
+            type: string
+            example: "text/plain,text/html"
+        - name: topic
+          in: query
+          description: Topic to filter by (searches in subjects and bookshelves, supports case-insensitive partial matches)
+          schema:
+            type: string
+            example: "child"
+        - name: author
+          in: query
+          description: Author name (supports case-insensitive partial matches)
+          schema:
+            type: string
+            example: "Shakespeare"
+        - name: title
+          in: query
+          description: Book title (supports case-insensitive partial matches)
+          schema:
+            type: string
+            example: "Hamlet"
+        - name: page
+          in: query
+          description: Page number for pagination (25 books per page)
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_books:
+                    type: integer
+                    description: Total number of books meeting the filter criteria
+                  page:
+                    type: integer
+                    description: Current page number
+                  total_pages:
+                    type: integer
+                    description: Total number of pages available
+                  books:
+                    type: array
+                    description: List of books (max 25 per page)
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          description: Project Gutenberg book ID
+                        title:
+                          type: string
+                          description: Title of the book
+                        author:
+                          type: object
+                          description: Information about the author
+                          properties:
+                            name:
+                              type: string
+                            birth_year:
+                              type: integer
+                              nullable: true
+                            death_year:
+                              type: integer
+                              nullable: true
+                        genre:
+                          type: string
+                          nullable: true
+                          description: Genre of the book
+                        language:
+                          type: string
+                          description: Language code of the book
+                        subjects:
+                          type: array
+                          description: List of subjects
+                          items:
+                            type: string
+                        bookshelves:
+                          type: array
+                          description: List of bookshelves
+                          items:
+                            type: string
+                        download_links:
+                          type: array
+                          description: List of download links in various formats
+                          items:
+                            type: object
+                            properties:
+                              mime_type:
+                                type: string
+                              url:
+                                type: string
+        '400':
+          description: Bad request (invalid parameters)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
